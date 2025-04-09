@@ -1,0 +1,28 @@
+{
+    "navigation": {
+        "home": "Home",
+        "about": "About",
+        "contact": "Contact",
+        "services": "Services",
+        "blog": "Blog"
+    },
+    "footer": {
+        "privacy_policy": "Privacy Policy",
+        "terms_of_service": "Terms of Service",
+        "contact_us": "Contact Us",
+        "follow_us": "Follow Us"
+    },
+    "header": {
+        "welcome": "Welcome to Our Website",
+        "search_placeholder": "Search...",
+        "login": "Login",
+        "register": "Register"
+    },
+    "buttons": {
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "view_more": "View More"
+    }
+}
