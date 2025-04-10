@@ -58,7 +58,7 @@ const AutocompleteControlledUncontrolled = () => {
         onInputChange={handleInputChange} // Capture the input value
         id='autocomplete-controlled'
         getOptionLabel={option => option.title || ''} // Adjust according to your data structure
-        renderInput={params => <CustomTextField {...params} label='Controlled' />}
+        renderInput={params => <CustomTextField {...params}  />}
       />
    </>
   )

@@ -21,6 +21,7 @@ import styles from './styles.module.css'
 import frontCommonStyles from '@views/front-pages/styles.module.css'
 import CustomTextField from '@/@core/components/mui/TextField'
 import JobSearchForm from './JobSearchForm'
+import SearchBarHome from '@components/job/SearchBarHome'
 
 const HeroSection = ({ mode }) => {
   // States
@@ -74,7 +75,8 @@ const HeroSection = ({ mode }) => {
       <div className={classnames('pbs-[88px] overflow-hidden', frontCommonStyles.layoutSpacing)}>
         <div className='md:max-is-[1050px] mbs-0 mbe-7 mli-auto text-center relative'>
 
-        <JobSearchForm/>
+        {/* <JobSearchForm/> */}
+        <SearchBarHome/>
           <Typography
             className={classnames('font-extrabold sm:text-[42px] text-3xl mbe-4 leading-[48px]', styles.heroText)}
           >
