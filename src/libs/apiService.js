@@ -3,10 +3,15 @@ import axios from 'axios';
 import endpoints from './endpoints';
 
 const api = axios.create({
-  baseURL: 'https://iitjobs.com/api',
+  baseURL: 'https://testxsystem.iitjobs.com/api',
   withCredentials: true,
+  timeout: 10000, // 10 seconds
+  maxRedirects: 5,
+
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': '*',
+    'Accept': '*',
+
   },
 });
 

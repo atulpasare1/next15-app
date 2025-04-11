@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react'
 
 // Third-party Imports
 import styled from '@emotion/styled'
+import logo from '@assets/imgs/logo.png'
+import { useRouter } from 'next/navigation'
 
 // Component Imports
 import VuexyLogo from '@core/svg/Logo'
@@ -15,13 +17,14 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
+import Image from 'next/image'
 
 const LogoText = styled.span`
   color: ${({ color }) => color ?? 'var(--mui-palette-text-primary)'};
   font-size: 1.375rem;
   line-height: 1.09091;
   font-weight: 700;
-  letter-spacing: 0.25px;
+
   transition: ${({ transitionDuration }) =>
     `margin-inline-start ${transitionDuration}ms ease-in-out, opacity ${transitionDuration}ms ease-in-out`};
 
@@ -59,7 +62,7 @@ const Logo = ({ color }) => {
 
   return (
     <div className='flex items-center'>
-      <VuexyLogo className='text-2xl text-primary' />
+
       <LogoText
         color={color}
         ref={logoTextRef}
@@ -68,7 +71,7 @@ const Logo = ({ color }) => {
         transitionDuration={transitionDuration}
         isBreakpointReached={isBreakpointReached}
       >
-        {themeConfig.templateName}
+       <Image src={logo} alt='logo' width={40} height={40} className='h-10 w-10 ' />
       </LogoText>
     </div>
   )

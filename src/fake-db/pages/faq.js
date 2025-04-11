@@ -1,150 +1,132 @@
 export const db = [
   {
-    id: 'payment',
-    title: 'Payment',
+    id: 'employers',
+    title: 'FAQs for Employers',
     icon: 'tabler-credit-card',
-    subtitle: 'Get help with payment',
+    subtitle: 'FAQ for Employers',
     questionsAnswers: [
       {
-        id: 'order-payment',
-        question: 'When is payment taken for my order?',
-        answer:
-          'Payment is taken during the checkout process when you pay for your order. The order number that appears on the confirmation screen indicates payment has been successfully processed.'
+        id: 'job-portal-intro',
+        question: 'What is iitjobs.com?',
+        answer: 'iitjobs.com is a unique, simple (plug & play) Job portal specific to Information Technology for job seekers and employers with integrated iTATSsm- Talent Acquisition Tracking System.'
       },
       {
-        id: 'order',
-        question: 'How do I pay for my order?',
-        answer:
-          'We accept Visa®, MasterCard®, American Express®, and PayPal®. Our servers encrypt all information submitted to them, so you can be confident that your credit card information will be kept safe and secure.'
+        id: 'itats-definition',
+        question: 'What is iTATSsm – Talent Acquisition Tracking System?',
+        answer: 'iitjobs.com is a unique, simple (plug & play) Job portal specific to Information Technology for job seekers and employers with integrated iTATSsm- Talent Acquisition Tracking System. iTATSsm is a web based enterprise-wide candidate tracking system.'
       },
       {
-        id: 'placing-order',
+        id: 'order-trouble-help',
         question: "What should I do if I'm having trouble placing an order?",
-        answer:
-          'For any technical difficulties you are experiencing with our website, please contact us at our support portal, or you can call us toll-free at 1-000-000-000, or email us at order@companymail.com'
+        answer: 'For any technical difficulties you are experiencing with our website, please contact us at our support portal, or you can call us toll-free at 1-000-000-000, or email us at order@companymail.com'
       },
       {
-        id: 'users-license',
+        id: 'license-info',
         question: 'Which license do I need for an end product that is only accessible to paying users?',
-        answer:
-          'If you have paying users or you are developing any SaaS products then you need an Extended License. For each products, you need a license. You can get free lifetime updates as well.'
+        answer: 'If you have paying users or you are developing any SaaS products then you need an Extended License. For each products, you need a license. You can get free lifetime updates as well.'
       },
       {
-        id: 'subscription-review',
+        id: 'subscription-policy',
         question: 'Does my subscription automatically renew?',
-        answer:
-          'No, This is not subscription based item.Pastry pudding cookie toffee bonbon jujubes jujubes powder topping. Jelly beans gummi bears sweet roll bonbon muffin liquorice. Wafer lollipop sesame snaps.'
+        answer: 'No, This is not subscription based item. Pastry pudding cookie toffee bonbon jujubes jujubes powder topping. Jelly beans gummi bears sweet roll bonbon muffin liquorice. Wafer lollipop sesame snaps.'
+      },
+      {
+        id: 'itats-key-features',
+        question: 'What are the key features of iTATSsm?',
+        answer: 'Key features of iTATSsm are tracking of candidates, simple functionality to move resumes from the job board to your company\'s iTATSsm, add notes, recruiters\' portal and many other excellent features.'
+      },
+      {
+        id: 'lost-password-help',
+        question: 'Whom should I contact for lost password?',
+        answer: 'Please contact <a href="mailto:support@iitjobs.com">support@iitjobs.com.</a>'
+      },
+      {
+        id: 'free-email-restriction',
+        question: 'Why employer cannot create accounts with free e-mail based system e.g. Hotmail, Yahoo etc?',
+        answer: 'To protect privacy, eliminate fraud, non-abuse of the system etc, access will be given only to legitimate business E-mail accounts.'
+      },
+      {
+        id: 'job-ad-validity',
+        question: 'How many days is a single Job Ad valid for?',
+        answer: 'A Job Ad is valid for 30 days. After 30 days you need to refresh the Job Ad to ensure its relevance.'
+      },
+      {
+        id: 'max-job-ads-limit',
+        question: 'Why can a user post only 10 maximum Job Ads and not more?',
+        answer: 'Even if single recruiter has 10 Jobs to fill in 24 hours, it’s too many – you need help!'
+      },
+      {
+        id: 'internal-confidential-ads',
+        question: 'How does Internal and Confidential Job Ad functionality work in iTATSsm?',
+        answer: 'Companies can post unlimited Internal and Confidential Job Ads at no extra cost and they all will be seen in their iTATSsm system but not on iitjobs.com portal. These Job Ads will be valid only for 30 days.'
+      },
+      {
+        id: 'resume-import',
+        question: 'We have large resume database in other applications. Can our company transfer them in iTATSsm?',
+        answer: 'Absolutely. Please contact our team member or e-mail <a href="mailto:support@iitjobs.com">support@iitjobs.com.</a>'
+      },
+      {
+        id: 'search-technology',
+        question: 'How is your search different than other Job boards?',
+        answer: 'We have implemented ‘Tag’ based search technology for ‘bulls eye" search.'
+      },
+      {
+        id: 'spam-block',
+        question: 'What is spam block and filters?',
+        answer: 'We have not provided ‘job cart’ to candidates, thus they just cannot mass e-mail and apply to job posts without understanding the requirements of the job. They have to individually apply to Job Ads which indicates quality and serious job seekers.'
+      },
+      {
+        id: 'reapply-policy',
+        question: 'Can candidate reapply to same Job Ad?',
+        answer: 'No, a candidate can only apply once for a given Job Ad.'
+      },
+      {
+        id: 'templates-save',
+        question: 'Can recruiter save Job Ads, e-mail campaign and response templates?',
+        answer: 'Absolutely, save as many as you can.'
+      },
+      {
+        id: 'quick-email-function',
+        question: 'Is there a quick functionality to send e-mail to contact a candidate?',
+        answer: 'Yes, once you have saved a template its only one click!'
       }
     ]
   },
+
 
   // delivery
   {
-    id: 'delivery',
-    title: 'Delivery',
-    icon: 'tabler-briefcase',
-    subtitle: 'Get help with delivery',
+    id: 'job-seekers',
+    title: 'FAQs for Job Seekers',
+    icon: 'tabler-users',
+    subtitle: 'FAQs for Job Seekers',
     questionsAnswers: [
       {
-        id: 'ship-order',
-        question: 'How would you ship my order?',
+        id: 'why-use-iitjobs',
+        question: 'Why should I use iitjobs.com?',
         answer:
-          'For large products, we deliver your product via a third party logistics company offering you the “room of choice” scheduled delivery service. For small products, we offer free parcel delivery.'
+          'To make your resume accessible to global employers, Information Technology specific job portal and unique tracking system –iPACTSsm.'
       },
       {
-        id: 'delivery-cost',
-        question: 'What is the delivery cost of my order?',
+        id: 'unique-it-job',
+        question: 'What is unique about IT specific Job?',
         answer:
-          'The cost of scheduled delivery is $69 or $99 per order, depending on the destination postal code. The parcel delivery is free.'
+          'Firstly iitjobs.com is IT specific Job Portal, so your resume does not get buried by non-IT resumes. Secondly, our ‘Tag’ based search technology ensures employers find your resume easily.'
       },
       {
-        id: 'product-damaged',
-        question: 'What to do if my product arrives damaged?',
+        id: 'global-resume-access',
+        question: 'What is Global resume access database?',
         answer:
-          'We will promptly replace any product that is damaged in transit. Just contact our support team, to notify us of the situation within 48 hours of product arrival.'
+          'Many large job portals do not give resume access to other regions and employers have to spend large amounts to have multiple regions access. Our portal gives your resume a global access, which will maximize your chances of finding good jobs.'
+      },
+      {
+        id: 'forgot-password',
+        question: 'What if I forget my registered password?',
+        answer:
+          'Click on the link "Forgot Password?" present on the home page and enter your E-mail ID used while registration. Password will be sent to this E-mail ID only.'
       }
     ]
   },
 
-  // cancellation and return
-  {
-    icon: 'tabler-refresh',
-    id: 'cancellation-return',
-    title: 'Cancellation & Return',
-    subtitle: 'Get help with cancellation & return',
-    questionsAnswers: [
-      {
-        id: 'cancel-order',
-        question: 'Can I cancel my order?',
-        answer:
-          'Scheduled delivery orders can be cancelled 72 hours prior to your selected delivery date for full refund. Parcel delivery orders cannot be cancelled, however a free return label can be provided upon request.'
-      },
-      {
-        id: 'product-return',
-        question: 'Can I return my product?',
-        answer:
-          'You can return your product within 15 days of delivery, by contacting our support team, All merchandise returned must be in the original packaging with all original items.'
-      },
-      {
-        id: 'return-status',
-        question: 'Where can I view status of return?',
-        answer: 'Locate the item from Your Orders. Select Return/Refund status'
-      }
-    ]
-  },
 
-  // my orders
-  {
-    id: 'my-orders',
-    title: 'My Orders',
-    icon: 'tabler-box',
-    subtitle: 'Order details',
-    questionsAnswers: [
-      {
-        id: 'order-success',
-        question: 'Has my order been successful?',
-        answer:
-          'All successful order transactions will receive an order confirmation email once the order has been processed. If you have not received your order confirmation email within 24 hours, check your junk email or spam folder. Alternatively, log in to your account to check your order summary. If you do not have a account, you can contact our Customer Care Team on 1-000-000-000.'
-      },
-      {
-        id: 'promo-code',
-        question: 'My Promotion Code is not working, what can I do?',
-        answer: 'If you are having issues with a promotion code, please contact us at 1 000 000 000 for assistance.'
-      },
-      {
-        id: 'track-orders',
-        question: 'How do I track my Orders?',
-        answer:
-          'If you have an account just sign into your account from here and select “My Orders”. If you have a a guest account track your order from here using the order number and the email address.'
-      }
-    ]
-  },
-
-  // product and services
-  {
-    icon: 'tabler-settings',
-    id: 'product-services',
-    title: 'Product & Services',
-    subtitle: 'Get help with product & services',
-    questionsAnswers: [
-      {
-        id: 'shipping-notification',
-        question: 'Will I be notified once my order has shipped?',
-        answer:
-          'Yes, We will send you an email once your order has been shipped. This email will contain tracking and order information.'
-      },
-      {
-        id: 'warranty-notification',
-        question: 'Where can I find warranty information?',
-        answer:
-          'We are committed to quality products. For information on warranty period and warranty services, visit our Warranty section here.'
-      },
-      {
-        id: 'warranty-coverage',
-        question: 'How can I purchase additional warranty coverage?',
-        answer:
-          'For the peace of your mind, we offer extended warranty plans that add additional year(s) of protection to the standard manufacturer’s warranty provided by us. To purchase or find out more about the extended warranty program, visit Extended Warranty section here.'
-      }
-    ]
-  }
 ]

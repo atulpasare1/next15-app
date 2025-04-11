@@ -2,12 +2,14 @@
   "name": "next-15iitjobs",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://iitjobs.com",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
+
   "dependencies": {
     "@auth/prisma-adapter": "2.7.4",
     "@emoji-mart/data": "1.2.1",

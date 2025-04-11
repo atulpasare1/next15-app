@@ -70,75 +70,29 @@ const FrontMenu = props => {
 
   return (
     <Wrapper isBelowLgScreen={isBelowLgScreen} isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen}>
-      <Typography
-        color='text.primary'
-        component={Link}
-        href='/front-pages/landing-page'
-        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary':
-            !intersections.features &&
-            !intersections.team &&
-            !intersections.faq &&
-            !intersections['contact-us'] &&
-            pathname === '/front-pages/landing-page'
-        })}
-      >
-        Home
-      </Typography>
-      <Typography
-        color='text.primary'
-        component={Link}
-        href='/front-pages/landing-page#features'
-        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.features
-        })}
-      >
-        Features
-      </Typography>
-      <Typography
-        color='text.primary'
-        component={Link}
-        href='/front-pages/landing-page#team'
-        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.team
-        })}
-      >
-        Team
-      </Typography>
-      <Typography
-        color='text.primary'
-        component={Link}
-        href='/front-pages/landing-page#faq'
-        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.faq
-        })}
-      >
-        FAQ
-      </Typography>
-      <Typography
-        color='text.primary'
-        component={Link}
-        href='/front-pages/landing-page#contact-us'
-        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections['contact-us']
-        })}
-      >
-        Contact us
-      </Typography>
+
+
       <DropdownMenu
         mode={mode}
         isBelowLgScreen={isBelowLgScreen}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
       />
-      <Typography
-        component={Link}
+      <DropdownMenu
+        mode={mode}
+        isBelowLgScreen={isBelowLgScreen}
+        isDrawerOpen={isDrawerOpen}
+        setIsDrawerOpen={setIsDrawerOpen}
+      />
+       <Typography
         color='text.primary'
-        href='/'
-        target='_blank'
-        className='font-medium plb-3 pli-1.5 hover:text-primary'
+        component={Link}
+        href='/about'
+        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
+          'text-primary': intersections['contact-us']
+        })}
       >
-        Admin
+       About Us
       </Typography>
     </Wrapper>
   )

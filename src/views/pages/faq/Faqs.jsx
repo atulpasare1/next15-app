@@ -51,8 +51,9 @@ const FAQ = ({ faqData, searchValue }) => {
 
   return filteredData && filteredData.length > 0 ? (
     <TabContext value={activeTab}>
-      <Grid container spacing={6}>
+    <Grid container spacing={6} className="container mx-auto px-4 py-8 space-y-4">
         <Grid size={{ xs: 12, sm: 5, md: 4, xl: 3 }} className='flex flex-col items-center gap-4'>
+        <h2 className='text-xl font-semibold text-center'>Frequently Asked Questions</h2>
           <CustomTabList orientation='vertical' onChange={handleChange} className='is-full' pill='true'>
             {filteredData?.map((faq, index) => (
               <Tab
@@ -60,15 +61,11 @@ const FAQ = ({ faqData, searchValue }) => {
                 label={faq.title}
                 value={faq.id}
                 icon={<i className={classnames(faq.icon, '!mbe-0 mie-1.5')} />}
-                className='flex-row justify-start !min-is-full'
+                className='flex-row justify-start  !min-is-full '
               />
             ))}
           </CustomTabList>
-          <img
-            src='/images/illustrations/characters-with-objects/1.png'
-            className='max-md:hidden is-[230px]'
-            alt='john image'
-          />
+         
         </Grid>
         <Grid size={{ xs: 12, sm: 7, md: 8, xl: 9 }}>
           {filteredData?.map((faq, index) => (
@@ -101,7 +98,15 @@ const FAQ = ({ faqData, searchValue }) => {
           ))}
         </Grid>
       </Grid>
+      <style jsx global>{`
+        @media (min-width: 1536px) {
+          .container {
+            max-width: 1536px !important;
+          }
+        }
+      `}</style>
     </TabContext>
+    
   ) : (
     <div className='flex justify-center items-center'>
       <i className='tabler-alert-circle' />

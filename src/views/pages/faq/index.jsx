@@ -7,9 +7,9 @@ import { useState } from 'react'
 import Grid from '@mui/material/Grid2'
 
 // Component Imports
-import FaqHeader from '@views/pages/faq/FaqHeader'
+
 import Faqs from '@views/pages/faq/Faqs'
-import FaqFooter from '@views/pages/faq/FaqFooter'
+// import FaqFooter from '@views/pages/faq/FaqFooter'
 
 const FAQ = ({ data }) => {
   // States
@@ -17,17 +17,15 @@ const FAQ = ({ data }) => {
 
   return (
     <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <FaqHeader searchValue={searchValue} setSearchValue={setSearchValue} />
-      </Grid>
+      
       <Grid size={{ xs: 12 }}>
         <Faqs faqData={data} searchValue={searchValue} />
       </Grid>
-      <Grid size={{ xs: 12 }}>
-        <FaqFooter />
-      </Grid>
+      
     </Grid>
+    
   )
+  
 }
 
 export default FAQ
