@@ -3,7 +3,7 @@ import JobCard from '@/components/job/JobCard';
 import SearchBar from '@/components/job/SearchBar';
 import React, { useState, useEffect } from 'react';
 import apiService, { endpoints } from '@/libs/apiService';
-import { useRouter } from 'next/navigation';
+import { useRouter,useParams, usePathname } from 'next/navigation';
 
 const JobSearchResult = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -12,40 +12,64 @@ const JobSearchResult = () => {
   const [jobtitle, setJobtitle] = useState('');
   const [location, setLocation] = useState('');
   const [experience, setExperience] = useState('Your Experience');
+  const [companyName, setCompanyName] = useState("");
   const router = useRouter();
-
+// Get dynamic params and pathname
+const params = useParams();
+const pathname = usePathname();
   // Extract values from URL and fetch jobs
   useEffect(() => {
-    const { asPath } = router;
-    if (asPath) {
-      const pathSegments = asPath.split('/').filter(segment => segment);
-      if (pathSegments.length > 0) {
-        const searchParams = pathSegments[0].split('-');
+    // Reset state to avoid stale values
+    setJobtitle("");
+    setLocation("");
+    setCompanyName("");
 
-        let extractedJobtitle = '';
-        let extractedLocation = '';
-        let extractedExperience = '';
-
-        searchParams.forEach((param, index) => {
-          if (param === 'jobs') {
-            extractedJobtitle = searchParams.slice(0, index).join(' ').replace(/-/g, ' ');
-          } else if (param === 'in') {
-            extractedLocation = searchParams
-              .slice(index + 1, searchParams.indexOf('jobs') === -1 ? undefined : searchParams.indexOf('jobs'))
-              .join(' ')
-              .replace(/-/g, ' ');
-          } else if (index > searchParams.indexOf('in') && param !== 'in' && !param.includes('jobs')) {
-            extractedExperience = searchParams.slice(searchParams.indexOf('in') + 1).join(' ').replace(/-/g, ' ');
-          }
-        });
-
-        if (extractedJobtitle) setJobtitle(extractedJobtitle);
-        if (extractedLocation) setLocation(extractedLocation);
-        if (extractedExperience && extractedExperience !== '') setExperience(extractedExperience);
+    // Handle route: /[keyword]-jobs (e.g., /java-jobs)
+    if (pathname.match(/\/[^/]+-jobs$/)) {
+      const keyword = params.keyword;
+      if (keyword) {
+        // Convert keyword to readable format (e.g., "java" -> "Java")
+        const formattedJobtitle = keyword
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        setJobtitle(formattedJobtitle);
       }
     }
-    fetchJobs(); // Fetch jobs after parsing URL
-  }, [router.asPath]);
+    // Handle route: /[keyword]-jobs-in-[location] (e.g., /java-jobs-in-india)
+    else if (pathname.match(/\/[^/]+-jobs-in-[^/]+$/)) {
+      const keyword = params.keyword;
+      const location = params.location;
+      if (keyword) {
+        const formattedJobtitle = keyword
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        setJobtitle(formattedJobtitle);
+      }
+      if (location) {
+        const formattedLocation = location
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        setLocation(formattedLocation);
+      }
+    }
+    // Handle route: /jobs-by-[companyName] (e.g., /jobs-by-iitjobs-inc)
+    else if (pathname.match(/\/jobs-by-[^/]+$/)) {
+      const company = params.companyName;
+      if (company) {
+        const formattedCompanyName = company
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        setCompanyName(formattedCompanyName);
+      }
+    }
+
+    // Fetch jobs after setting parameters
+    fetchJobs();
+  }, [pathname, params]);
 
   // Fetch jobs based on current state
   const fetchJobs = async () => {
@@ -70,23 +94,81 @@ const JobSearchResult = () => {
     }
   };
 
-  // Handle form submission from SearchBar
-  const handleSearchSubmit = (newJobtitle, newLocation, newExperience) => {
+  // // Handle form submission from SearchBar
+  // const handleSearchSubmit = (newJobtitle, newLocation, newExperience) => {
+  //   setJobtitle(newJobtitle);
+  //   setLocation(newLocation);
+  //   setExperience(newExperience);
+  //   fetchJobs(); // Refetch jobs with new parameters
+
+  //   const formattedJobtitle = newJobtitle.trim().replace(/\s+/g, '-').toLowerCase();
+  //   const formattedLocation = newLocation.trim().replace(/\s+/g, '-').toLowerCase();
+  //   const formattedExperience = newExperience.trim().replace(/\s+/g, '-').toLowerCase();
+
+  //   let searchUrl = `/${formattedJobtitle}-jobs`;
+  //   if (formattedLocation) searchUrl += `-in-${formattedLocation}`;
+  //   if (formattedExperience && formattedExperience !== 'your-experience') searchUrl += `-${formattedExperience}`;
+
+  //   console.log('Navigating to:', searchUrl);
+  //   router.push(searchUrl);
+  // };
+
+  // Handle form submission and navigate to appropriate route
+  const handleSearchSubmit = (newJobtitle, newLocation, newCompanyName) => {
+    // Update state
     setJobtitle(newJobtitle);
     setLocation(newLocation);
-    setExperience(newExperience);
-    fetchJobs(); // Refetch jobs with new parameters
+    setCompanyName(newCompanyName);
 
-    const formattedJobtitle = newJobtitle.trim().replace(/\s+/g, '-').toLowerCase();
-    const formattedLocation = newLocation.trim().replace(/\s+/g, '-').toLowerCase();
-    const formattedExperience = newExperience.trim().replace(/\s+/g, '-').toLowerCase();
+    // Format inputs for URL (convert to kebab-case)
+    const formattedJobtitle = newJobtitle
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+    const formattedLocation = newLocation
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+    const formattedCompanyName = newCompanyName
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase();
 
-    let searchUrl = `/${formattedJobtitle}-jobs`;
-    if (formattedLocation) searchUrl += `-in-${formattedLocation}`;
-    if (formattedExperience && formattedExperience !== 'your-experience') searchUrl += `-${formattedExperience}`;
+    let searchUrl = "";
 
-    console.log('Navigating to:', searchUrl);
+    // Determine route based on inputs
+    if (formattedCompanyName && !formattedJobtitle && !formattedLocation) {
+      // Route 3: /jobs-by-[companyName]
+      searchUrl = `/jobs-by-${formattedCompanyName}`;
+    } else if (formattedJobtitle && formattedLocation) {
+      // Route 2: /[keyword]-jobs-in-[location]
+      searchUrl = `/${formattedJobtitle}-jobs-in-${formattedLocation}`;
+    } else if (formattedJobtitle) {
+      // Route 1: /[keyword]-jobs
+      searchUrl = `/${formattedJobtitle}-jobs`;
+    } else {
+      // Fallback: Redirect to a default route or homepage
+      searchUrl = "/jobs";
+    }
+
+    // Navigate to the new URL
+    console.log("Navigating to:", searchUrl);
     router.push(searchUrl);
+
+    // Fetch jobs immediately with new parameters
+    fetchJobs(newJobtitle, newLocation, newCompanyName);
+  };
+
+  // Mock fetchJobs function (replace with your actual implementation)
+
+  // Example form to test handleSearchSubmit
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const newJobtitle = formData.get("jobtitle") || "";
+    const newLocation = formData.get("location") || "";
+    const newCompanyName = formData.get("companyName") || "";
+    handleSearchSubmit(newJobtitle, newLocation, newCompanyName);
   };
 
   return (

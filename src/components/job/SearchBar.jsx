@@ -114,7 +114,7 @@ const SearchBar = ({ initialJobtitle = '', initialLocation = '', initialExperien
         <TextField
           variant="outlined"
           placeholder="java"
-          value={jobtitle}
+          value={jobtitle || initialJobtitle}
           onChange={(e) => setJobtitle(e.target.value)}
           size="small"
           InputProps={{
@@ -127,7 +127,7 @@ const SearchBar = ({ initialJobtitle = '', initialLocation = '', initialExperien
         <TextField
           variant="outlined"
           placeholder="City/State/Country"
-          value={location}
+          value={location || initialLocation}
           onChange={(e) => setLocation(e.target.value)}
           size="small"
           InputProps={{
