@@ -10,6 +10,9 @@ import themeConfig from '@configs/themeConfig'
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
+// Layout Imports
+import GuestLayout from '@layouts/GuestLayout'
+
 const GuestOnlyRoute = async ({ children, lang }) => {
   const session = await getServerSession()
 
@@ -17,7 +20,7 @@ const GuestOnlyRoute = async ({ children, lang }) => {
     redirect(getLocalizedUrl(themeConfig.homePageUrl, lang))
   }
 
-  return <>{children}</>
+  return <GuestLayout>{children}</GuestLayout>
 }
 
 export default GuestOnlyRoute

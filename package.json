@@ -2,7 +2,7 @@
   "name": "next-15iitjobs",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://iitjobs.com",
+  "proxy": "https://testxlake.iitjobs.com",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

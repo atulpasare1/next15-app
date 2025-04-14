@@ -9,12 +9,12 @@ import { useSettings } from './useSettings'
 
 export const useImageVariant = (mode, imgLight, imgDark, imgLightBordered, imgDarkBordered) => {
   // Hooks
-  const { settings } = useSettings()
+
   const { mode: muiMode, systemMode: muiSystemMode } = useColorScheme()
 
   return useMemo(() => {
     const currentMode = muiMode === 'system' ? muiSystemMode : muiMode || mode
-    const isBordered = settings?.skin === 'bordered'
+    const isBordered = false
     const isDarkMode = currentMode === 'dark'
 
     if (isBordered && imgLightBordered && imgDarkBordered) {

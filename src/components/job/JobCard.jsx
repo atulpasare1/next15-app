@@ -4,32 +4,34 @@ import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import classnames from 'classnames';
 import CustomAvatar from '@core/components/mui/Avatar';
+import { slugify } from '@/libs/helper';
+import Link from 'next/link';
+import { List, ListItem, ListItemText } from '@mui/material';
 const JobCard = ({ job }) => {
   // Destructure job object with fallback values
   const {
-    title = 'Senior Software Developer (JAVA)',
-    company = 'Siemens',
-    rating = 4.1,
-    reviews = 4908,
-    experience = '5-10 Yrs',
-    salary = '₹ Not disclosed',
-    location = 'Bengaluru',
-    description = 'Hello talented techie! We re looking for dedicated individuals with the skills to help us build and maintain a cutting-edge distribution system.',
-    postedDate = '1 Day Ago',
-    skills = ['software development', 'distribution system', 'spring boot', 'java', 'oops', 'kubernetes'],
-    companyLogo = 'https://demos.pixinvent.com/vuexy-nextjs-admin-template/demo-1/images/logos/google.png', // Default logo URL
+    title = job.job_title,
+    company = job.company_name,
+    experience = job.experience,
+    minsalary = job.min_salary_offered,
+    maxsalary = job.max_salary_offered,
+    location = job.job_location,
+    description = job.job_description,
+    postedDate = job.posted_date,
+    skills = job.skills,
+    cmpLogo = `https://iitjobs.com/employer/media/company_docs/${job.cmp_id}/${job.companyLogo}`, // Default logo URL
   } = job;
 
   return (
     <Card sx={{ maxWidth: 800, margin: 2, borderRadius: 2, boxShadow: 3 }}>
       <CardContent>
         {/* Job Title and Company */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0}>
           <Typography variant="h6" component="div">
-            {title}
+           <Link href={`/job/${slugify(title)}-${slugify(location)}-${job.id}`}>{title}</Link>
           </Typography>
           <img
-            src={companyLogo}
+            src={cmpLogo}
             alt={`${company} Logo`}
             style={{ height: 40 }}
             onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }} // Fallback for broken image
@@ -37,30 +39,46 @@ const JobCard = ({ job }) => {
         </Stack>
 
         {/* Company Rating and Reviews */}
-        <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-          <i className='tabler-star text-lg' />
-          <Typography variant="body2" color="text.secondary">
-            {rating} ★ {reviews} Reviews
-          </Typography>
-        </Stack>
-
-        {/* Job Details */}
-        <Stack direction="row" spacing={1} mb={2}>
-          <Chip label={experience} size="small" variant="outlined" />
-          <Chip label={salary} size="small" variant="outlined" />
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack direction="row" alignItems="center" spacing={1} mb={0}>
+        <Stack direction="row" alignItems="center" mb={3} spacing={0.5}>
             <i className='tabler-map-pin text-lg' />
+        
             <Typography variant="body2" color="text.secondary">
               {location}
             </Typography>
           </Stack>
+          <i className='tabler-company text-lg' />
+          <Typography variant="body2" mx={5} color="text.secondary">
+            {company}
+          </Typography>
+          
+        </Stack>
+
+        {/* Job Details */}
+        <Stack direction="row" spacing={1} mb={0}>
+         
+        <List sx={{ width: '100%',mb:0 }}>
+      <ListItem>
+        <ListItemText
+        
+          secondary={
+            <>
+              <span style={{}}>• 5+ years of experience • 1 opening</span>
+            </>
+          }
+        />
+      </ListItem>
+     
+    </List>
         </Stack>
 
         {/* Job Description and Skills */}
         <Typography variant="body2" color="text.secondary" mb={2}>
-          {description}
+        
           <br />
-          {skills.join(' • ')}
+          {skills.split(',').map((skill, index) =>
+   <Chip label={skill.trim()} key={index} size="small" variant="filled" sx={{ margin: 0.5 }} />
+)}
         </Typography>
 
         {/* Posted Date and Save Button */}

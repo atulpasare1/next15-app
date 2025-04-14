@@ -30,7 +30,7 @@ const themeConfig = {
     contentWidth: 'wide', // 'compact', 'wide'
     floating: true, //! true, false (This will not work in the Horizontal Layout)
     detached: false, //! true, false (This will not work in the Horizontal Layout or floating navbar is enabled)
-    blur: false // true, false
+    blur: true // true, false
   },
   contentWidth: 'compact', // 'compact', 'wide'
   footer: {

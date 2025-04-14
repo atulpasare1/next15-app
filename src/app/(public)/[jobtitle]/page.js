@@ -24,94 +24,257 @@ const pathname = usePathname();
     setLocation("");
     setCompanyName("");
 
+    let jobKeyword = "";
+    let jobLocation = "";
+    let jobCompany = "";
+
+    console.log('Current pathname:', pathname);
+    console.log('Current params:', params);
+
     // Handle route: /[keyword]-jobs (e.g., /java-jobs)
     if (pathname.match(/\/[^/]+-jobs$/)) {
-      const keyword = params.keyword;
+      const keyword = params.jobtitle;
       if (keyword) {
         // Convert keyword to readable format (e.g., "java" -> "Java")
-        const formattedJobtitle = keyword
+        const formattedKeyword = keyword
           .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
-        setJobtitle(formattedJobtitle);
+        setJobtitle(formattedKeyword);
+        jobKeyword = formattedKeyword;
       }
     }
-    // Handle route: /[keyword]-jobs-in-[location] (e.g., /java-jobs-in-india)
+    // Handle route: /[keyword]-jobs-in-[location] (e.g., /java-jobs-in-bangalore)
     else if (pathname.match(/\/[^/]+-jobs-in-[^/]+$/)) {
-      const keyword = params.keyword;
-      const location = params.location;
+      const keyword = params.jobtitle;
+      const locationMatch = pathname.match(/jobs-in-([^/]+)$/);
+      const location = locationMatch ? locationMatch[1] : "";
+
       if (keyword) {
-        const formattedJobtitle = keyword
+        const formattedKeyword = keyword
           .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
-        setJobtitle(formattedJobtitle);
+        setJobtitle(formattedKeyword);
+        jobKeyword = formattedKeyword;
       }
+
       if (location) {
         const formattedLocation = location
           .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
         setLocation(formattedLocation);
+        jobLocation = formattedLocation;
       }
     }
     // Handle route: /jobs-by-[companyName] (e.g., /jobs-by-iitjobs-inc)
     else if (pathname.match(/\/jobs-by-[^/]+$/)) {
-      const company = params.companyName;
+      // Extract company name from the URL
+      const companyMatch = pathname.match(/\/jobs-by-([^/]+)$/);
+      const company = companyMatch ? companyMatch[1] : "";
+      
+      console.log('Extracted company from URL:', company);
+      
       if (company) {
+        // Format company name - try both formatted and original versions
         const formattedCompanyName = company
           .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
+        
+        // Keep the original format as well (might be what API expects)
+        const originalCompanyName = company.replace(/-/g, " ");
+        
+        console.log('Formatted company name:', formattedCompanyName);
+        console.log('Original company name:', originalCompanyName);
+        
         setCompanyName(formattedCompanyName);
+        // Use the original format for the API call
+        jobCompany = originalCompanyName;
       }
     }
 
-    // Fetch jobs after setting parameters
-    fetchJobs();
+    console.log('Extracted parameters:', { jobKeyword, jobLocation, jobCompany });
+    
+    // Fetch jobs with the extracted parameters
+    fetchJobsWithParams(jobKeyword, jobLocation, jobCompany);
   }, [pathname, params]);
 
-  // Fetch jobs based on current state
-  const fetchJobs = async () => {
+  // Fetch jobs with specific parameters
+  const fetchJobsWithParams = async (jobKeyword, jobLocation, jobCompany) => {
     setLoading(true);
     try {
-      const response = await apiService.get(endpoints.job.searchJobs, {
-        params: {
-          k: jobtitle || undefined,
-          l: location || undefined,
-          exp: experience !== 'Your Experience' ? experience : undefined,
+      console.log('Fetching jobs with params:', {
+        k: jobKeyword || undefined,
+        l: jobLocation || undefined,
+        company: jobCompany || undefined
+      });
+      
+      // Create a clean params object without undefined values
+      const params = {};
+      if (jobKeyword) params.k = jobKeyword;
+      if (jobLocation) params.l = jobLocation;
+      if (jobCompany) {
+        // Try different formats for company name
+        params.k = jobCompany;
+        
+        // Log the exact URL that will be sent
+        console.log('Company parameter:', params.k);
+      }
+      
+      // Build query string
+      const queryString = new URLSearchParams(params).toString();
+      
+      // Make direct fetch request to the API
+      const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
+      console.log('Fetching from URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
-      console.log('Fetched jobs:', response.data);
-      const data = Array.isArray(response.data) ? response.data.data : [];
-      setJobs(data);
-      console.log('Fetched jobs:', data);
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('API Response:', responseData);
+      
+      // Check if response data exists and has the expected structure
+      if (!responseData || !responseData.data || !responseData.data.jobs) {
+        console.error('Unexpected API response format:', responseData);
+        setJobs([]);
+        return;
+      }
+      
+      // Check if we got any jobs back
+      if (responseData.data.jobs.length === 0) {
+        console.log('No jobs found with the current parameters. Trying alternative approach...');
+        
+        // If no jobs found and we're searching by company, try a different format
+        if (jobCompany && !jobKeyword && !jobLocation) {
+          // Try searching by keyword instead
+          const keywordFromCompany = jobCompany.split(' ')[0]; // Use first word of company
+          console.log('Trying search with keyword instead:', keywordFromCompany);
+          
+          // Recursive call with different parameters
+          return fetchJobsWithParams(keywordFromCompany, '', '');
+        }
+      }
+      
+      console.log('Fetched jobs:-->', responseData);
+    
+      setJobs(responseData.data.jobs.map(jobs => {
+        const job = jobs._source;
+       
+        return {
+          id: job.id,
+          cmp_id: job.company_id,
+          companyLogo: job.company_logo,
+          job_title: job.job_title,
+          company_name: job.company_name,
+          job_location: job.job_location,
+          min_salary_offered: job.min_salary_offered,
+          max_salary_offered: job.max_salary_offered,
+          skills: job.skills,
+          experience: job.experience,
+          job_description: job.job_description,
+          posted_date: job.posted_date || '1 Day Ago'
+        }
+      }));
     } catch (err) {
       console.error('Error fetching jobs:', err);
+      console.error('Error details:', {
+        message: err.message,
+      });
       setJobs([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // // Handle form submission from SearchBar
-  // const handleSearchSubmit = (newJobtitle, newLocation, newExperience) => {
-  //   setJobtitle(newJobtitle);
-  //   setLocation(newLocation);
-  //   setExperience(newExperience);
-  //   fetchJobs(); // Refetch jobs with new parameters
-
-  //   const formattedJobtitle = newJobtitle.trim().replace(/\s+/g, '-').toLowerCase();
-  //   const formattedLocation = newLocation.trim().replace(/\s+/g, '-').toLowerCase();
-  //   const formattedExperience = newExperience.trim().replace(/\s+/g, '-').toLowerCase();
-
-  //   let searchUrl = `/${formattedJobtitle}-jobs`;
-  //   if (formattedLocation) searchUrl += `-in-${formattedLocation}`;
-  //   if (formattedExperience && formattedExperience !== 'your-experience') searchUrl += `-${formattedExperience}`;
-
-  //   console.log('Navigating to:', searchUrl);
-  //   router.push(searchUrl);
-  // };
+  // Regular fetchJobs that uses the current state
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      console.log('Fetching jobs with current state params:', {
+        k: jobtitle || undefined,
+        l: location || undefined,
+        exp: experience !== 'Your Experience' ? experience : undefined,
+        company: companyName || undefined
+      });
+      
+      // Create a clean params object without undefined values
+      const params = {};
+      if (jobtitle) params.k = jobtitle;
+      if (location) params.l = location;
+      if (experience && experience !== 'Your Experience') params.exp = experience;
+      if (companyName) params.company = companyName;
+      
+      // Build query string
+      const queryString = new URLSearchParams(params).toString();
+      
+      // Make direct fetch request to the API
+      const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
+      console.log('Fetching from URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('API Response:', responseData);
+      
+      // Check if response data exists and has the expected structure
+      if (!responseData || !responseData.data || !responseData.data.jobs) {
+        console.error('Unexpected API response format:', responseData);
+        setJobs([]);
+        return;
+      }
+      
+      console.log('Fetched jobs:-->', responseData);
+    
+      setJobs(responseData.data.jobs.map(jobs => {
+        const job = jobs._source;
+       
+        return {
+          id: job.id,
+          cmp_id: job.company_id,
+          companyLogo: job.company_logo,
+          job_title: job.job_title,
+          company_name: job.company_name,
+          job_location: job.job_location,
+          min_salary_offered: job.min_salary_offered,
+          max_salary_offered: job.max_salary_offered,
+          skills: job.skills,
+          experience: job.experience,
+          job_description: job.job_description,
+          posted_date: job.posted_date || '1 Day Ago'
+        }
+      }));
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      console.error('Error details:', {
+        message: err.message,
+      });
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle form submission and navigate to appropriate route
   const handleSearchSubmit = (newJobtitle, newLocation, newCompanyName) => {
@@ -156,10 +319,8 @@ const pathname = usePathname();
     router.push(searchUrl);
 
     // Fetch jobs immediately with new parameters
-    fetchJobs(newJobtitle, newLocation, newCompanyName);
+    fetchJobs();
   };
-
-  // Mock fetchJobs function (replace with your actual implementation)
 
   // Example form to test handleSearchSubmit
   const handleFormSubmit = (e) => {

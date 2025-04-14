@@ -35,7 +35,7 @@ import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
-import { useSettings } from '@core/hooks/useSettings'
+
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -44,9 +44,9 @@ import { getLocalizedUrl } from '@/utils/i18n'
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
   blockSize: 'auto',
-  maxBlockSize: 680,
+ 
   maxInlineSize: '100%',
-  margin: theme.spacing(12),
+  margin: theme.spacing(0),
   [theme.breakpoints.down(1536)]: {
     maxBlockSize: 550
   },
@@ -55,14 +55,7 @@ const LoginIllustration = styled('img')(({ theme }) => ({
   }
 }))
 
-const MaskImg = styled('img')({
-  blockSize: 'auto',
-  maxBlockSize: 355,
-  inlineSize: '100%',
-  position: 'absolute',
-  insetBlockEnd: 0,
-  zIndex: -1
-})
+
 
 const schema = object({
   email: pipe(string(), minLength(1, 'This field is required'), email('Email is invalid')),
@@ -81,8 +74,8 @@ const Login = ({ mode }) => {
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
   const lightImg = '/images/pages/auth-mask-light.png'
-  const darkIllustration = '/images/illustrations/auth/v2-login-dark.png'
-  const lightIllustration = '/images/illustrations/auth/v2-login-light.png'
+  const darkIllustration = '/images/illustrations/auth/banner.jpg'
+  const lightIllustration = '/images/illustrations/auth/banner.jpg'
   const borderedDarkIllustration = '/images/illustrations/auth/v2-login-dark-border.png'
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
@@ -90,7 +83,7 @@ const Login = ({ mode }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { lang: locale } = useParams()
-  const { settings } = useSettings()
+  
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
@@ -142,14 +135,12 @@ const Login = ({ mode }) => {
     <div className='flex bs-full justify-center'>
       <div
         className={classnames(
-          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative p-6 max-md:hidden',
-          {
-            'border-ie': settings.skin === 'bordered'
-          }
+          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative  max-md:hidden',
+          
         )}
       >
         <LoginIllustration src={characterIllustration} alt='character-illustration' />
-        {!hidden && <MaskImg alt='mask' src={authBackground} />}
+       
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
         <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
@@ -160,12 +151,7 @@ const Login = ({ mode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
-            <Typography variant='body2' color='primary.main'>
-              Email: <span className='font-medium'>admin@vuexy.com</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
-            </Typography>
-          </Alert>
+          
           <form
             noValidate
             autoComplete='off'

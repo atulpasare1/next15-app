@@ -32,8 +32,8 @@ const HeroSection = ({ mode }) => {
   const dashboardImageDark = '/images/front-pages/landing-page/hero-dashboard-dark.png'
   const elementsImageLight = '/images/front-pages/landing-page/hero-elements-light.png'
   const elementsImageDark = '/images/front-pages/landing-page/hero-elements-dark.png'
-  const heroSectionBgLight = '/images/front-pages/landing-page/hero-bg-light.png'
-  const heroSectionBgDark = '/images/front-pages/landing-page/hero-bg-dark.png'
+  const heroSectionBgLight = '/images/front-pages/landing-page/banner.jpg'
+  const heroSectionBgDark = '/images/front-pages/landing-page/banner.jpg'
 
   // Hooks
   const { mode: muiMode } = useColorScheme()
