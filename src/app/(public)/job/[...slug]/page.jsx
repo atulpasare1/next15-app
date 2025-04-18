@@ -96,7 +96,7 @@ const fetcher = async (url, jobId) => {
       ? `https://iitjobs.com/employer/media/company_docs/${data.company_id}/${data.company_logo}`
       : "/logo.png",
     company_url: data.company_url || "https://iitjobs.com",
-    location: data.jobLocation || "Remote",
+    location: data.job_location || "Remote",
     description: data.description || "No description available",
     keySkills: data.skills
       ? data.skills
@@ -106,7 +106,7 @@ const fetcher = async (url, jobId) => {
       : [],
     education: data.education || "Not specified",
     postedOn: data.postedDate || "Unknown",
-    experience: data.experience || "Not specified",
+    experience: data.working_exp || "Not specified",
     openings: data.vacancies || 1,
     category: data.job_category || "Not specified",
     tenure: data.jobTenure || "Not specified",
@@ -253,14 +253,15 @@ export default function JobDetailPage() {
                 </Typography>
                 <Typography className="text-sm text-blue-600 font-medium">
                   <Link href={`/companies/${job.companySlug}`} aria-label={`View ${job.company} company page`}>
-                    <span className="hover:underline">{job.company}</span>
+                  <i className="tabler-buildings "></i>  <span className="hover:underline">{job.company}</span>
                   </Link>
+                  <Typography className="text-sm text-gray-600">
+              📍 <strong>{job.location}</strong>
+            </Typography>
                 </Typography>
               </Box>
             </Box>
-            <Typography className="text-sm text-gray-600">
-              📍 <strong>{job.location}</strong>
-            </Typography>
+
           </Box>
         </Box>
 
@@ -289,7 +290,7 @@ export default function JobDetailPage() {
                     <Chip
                       key={index}
                       label={skill}
-                      className="bg-green-50 text-green-700 border border-green-200"
+                      className="bg-gray-50 text-gray-700 border rounded-full border-green-200"
                       size="small"
                     />
                   ))

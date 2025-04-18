@@ -77,6 +77,9 @@ const JobCard = ({ job }) => {
     <Chip
       label={skill.trim()}
       key={index}
+      className='rounded-full bg-gray-200 text-gray-500'
+      component="span"
+
       size="small"
       variant="filled"
       sx={{ margin: 0.5 }}

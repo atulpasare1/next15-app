@@ -18,6 +18,7 @@ const JobSearchResult = () => {
   const [filters, setFilters] = useState({});
   const [queryFilters, setQueryFilters] = useState({});
   const [totalPages, setTotalPages] = useState(1);
+  const [isHovered, setIsHovered] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -438,22 +439,57 @@ const renderPageLinks = () => {
       )}
 
       {/* Main Content */}
-      <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-        {/* Sidebar Filters (Desktop) */}
-        <div className="hidden md:block w-1/4  p-4 rounded-lg ">
-          <FilterContent />
-        </div>
+      {/* Main Content */}
+      <div className=" mt-12 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
 
-        {/* Job Listings */}
-        <div className="w-full md:w-2/4 space-y-4">
-          {loading ? (
-            <p>Loading jobs...</p>
-          ) : Array.isArray(jobs) && jobs.length > 0 ? (
-            jobs.map((job, index) => <JobCard key={index} job={job} />)
-          ) : (
-            <p>No jobs found.</p>
-          )}
-        </div>
+      {/* Sidebar Filters (Desktop) */}
+           <div className="hidden md:block w-1/4 p-4 rounded-lg">
+        <FilterContent />
+          </div>
+
+      {/* Job Listings */}
+            <div className="w-full md:w-2/4 space-y-4">
+
+        {/* Sort by Dropdown (Above job cards) */}
+               <div className="flex justify-start">
+                   <div
+                     className="relative inline-block text-left"
+                     onMouseEnter={() => setIsHovered(true)}
+                     onMouseLeave={() => setIsHovered(false)}
+                    >
+                           {/* Trigger Button */}
+                        <button className="bg-gray-600 text-white text-sm px-4 py-1 rounded-full flex items-center gap-1">
+                         Sort by: <span className="text-white">^</span>
+                       </button>
+
+                               {/* Dropdown Menu */}
+                        {isHovered && (
+                          <div className="absolute z-10 mt-2 w-64 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 p-2">
+                            <div className="px-4 py-2 hover:bg-gray-100 rounded cursor-pointer">
+                               <p className="font-medium text-sm text-gray-800">Recommended</p>
+                               <p className="text-xs text-gray-500">See jobs best suited for your profile first</p>
+                           </div>
+                           <hr className="my-2" />
+                             <div className="px-4 py-2 hover:bg-gray-100 rounded cursor-pointer">
+                               <p className="font-medium text-sm text-gray-800">Recent</p>
+                                 <p className="text-xs text-gray-500">See most recent job postings first</p>
+                             </div>
+                         </div>
+                            )}
+                    </div>
+                 </div>
+                 <p className="text-sm text-gray-500 mt-2 px-4">
+                   {pagination.from} - {pagination.to} of {pagination.totalItems} jobs
+                 </p>
+                       {/* Job Cards */}
+                   {loading ? (
+                     <p>Loading jobs...</p>
+                    ) : Array.isArray(jobs) && jobs.length > 0 ? (
+                      jobs.map((job, index) => <JobCard key={index} job={job} />)
+                    ) : (
+                   <p>No jobs found.</p>
+                   )}
+               </div>
       </div>
          {/* Pagination Controls */}
          <div style={{ marginTop: '20px', textAlign: 'center' }}>
