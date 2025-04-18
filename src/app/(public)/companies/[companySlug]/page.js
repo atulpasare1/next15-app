@@ -16,6 +16,8 @@ import Grid from "@mui/material/Grid2";
 export default function CompanyDetailPage() {
   const { companySlug } = useParams();
   const [company, setCompany] = useState(null);
+  const [activeTab, setActiveTab] = useState("profile");
+
 
   useEffect(() => {
     // Parse companySlug to extract company name and ID
@@ -51,98 +53,126 @@ export default function CompanyDetailPage() {
   if (!company) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <Box className="container mx-auto p-6 max-w-4xl">
-      <Paper elevation={3} className="p-6 bg-white rounded-lg shadow-lg">
-        {/* Header Section */}
-        <Box className="flex items-center justify-between mb-6 border-b pb-4">
-          <Box className="flex items-center">
-            <Typography
-              variant="h4"
-              component="h1"
-              className="font-bold text-gray-800 mr-4"
-            >
-              {company.name}
-            </Typography>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
             {company.logo && (
               <img
                 src={company.logo}
                 alt={`${company.name} Logo`}
-                className="h-10 mr-4"
+                className="h-16 w-16 object-contain rounded-md"
               />
             )}
-          </Box>
-          <Typography variant="body2" className="text-gray-600">
-            {company.location}
-          </Typography>
-        </Box>
-
-        {/* Main Content and Sidebar */}
-        <Grid container spacing={4}>
-          {/* Description Section */}
-          <Grid item xs={8}>
-            <Typography
-              variant="h6"
-              className="text-gray-800 mb-4 font-semibold"
-            >
-              About {company.name}
-            </Typography>
-            <Typography
-              variant="body2"
-              className="text-gray-700 mb-4"
-            >
-              {company.description}
-            </Typography>
-            <Typography
-              variant="body2"
-              className="text-gray-600 mb-2"
-            >
-              <strong>Website:</strong>{" "}
-              <a href={company.website} className="text-blue-500">
-                {company.website}
-              </a>
-            </Typography>
-            <Typography
-              variant="body2"
-              className="text-gray-600"
-            >
-              <strong>Contact Email:</strong> {company.contactEmail}
-            </Typography>
-          </Grid>
-
-          {/* Sidebar Section */}
-          <Grid item xs={4}>
-            <Box className="bg-gray-50 p-4 rounded-lg">
-              <Typography
-                variant="h6"
-                className="text-gray-800 mb-4 font-semibold"
-              >
-                Current Job Openings
-              </Typography>
-              {company.jobs.map((job, index) => (
-                <Typography
-                  key={index}
-                  variant="body2"
-                  className="text-gray-600 mb-2"
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">{company.name}</h1>
+              <div className="flex flex-wrap items-center gap-3 mt-1">
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 text-sm hover:underline flex items-center gap-1"
                 >
+                  🔗 {company.website}
+                </a>
+                <span className="text-sm text-gray-500">📍 {company.location}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        <button
+          className={`px-4 py-2 border rounded-full text-sm ${
+            activeTab === "profile" ? "bg-gray-100" : "bg-white"
+          } hover:bg-gray-200`}
+          onClick={() => setActiveTab("profile")}
+        >
+          👤 Profile
+        </button>
+        <button
+          className={`px-4 py-2 border rounded-full text-sm ${
+            activeTab === "jobs" ? "bg-gray-100" : "bg-white"
+          } hover:bg-gray-200`}
+          onClick={() => setActiveTab("jobs")}
+        >
+          📋 Jobs By {company.name}
+        </button>
+      </div>
+
+      {/* Content Based on Tab */}
+      {activeTab === "profile" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Side - About */}
+          <div className="md:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+              <h2 className="text-lg font-semibold mb-3 text-gray-800">ABOUT</h2>
+              <p className="text-gray-700 text-sm leading-relaxed">{company.description}</p>
+            </div>
+          </div>
+
+          {/* Right Side - Contacts and Social Info */}
+          <div className="space-y-4">
+            {/* CONTACTS */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-3 text-gray-800">CONTACTS</h2>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Website:</strong>{" "}
+                <a href={company.website} className="text-blue-500 hover:underline">
+                  {company.website}
+                </a>
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Address:</strong> Opposite Jaguar Showroom, beside HP petrol pump, Shaikpet Hyderabad Telangana India 500008
+              </p>
+            </div>
+
+            {/* SOCIAL INFO */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-3 text-gray-800">SOCIAL INFO</h2>
+              <a
+                href="https://www.linkedin.com/company/geekymindz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline text-sm flex items-center gap-1"
+              >
+                🔗 linkedin.com/company/geekymindz
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "jobs" && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">
+            Jobs by {company.name}
+          </h2>
+          {company.jobs && company.jobs.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-sm text-blue-600">
+              {company.jobs.map((job, index) => (
+                <li key={index}>
                   <a
                     href={`/job/${job.title
                       .toLowerCase()
-                      .replace(/\s+/g, "-")}-${company.location
-                      .toLowerCase()
-                      .replace(/, /g, "-")
                       .replace(/\s+/g, "-")}-${company.name
                       .toLowerCase()
                       .replace(/\s+/g, "-")}-${job.id}`}
-                    className="text-blue-500 hover:underline"
+                    className="hover:underline"
                   >
                     {job.title}
                   </a>
-                </Typography>
+                </li>
               ))}
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-600">No jobs available for this company.</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

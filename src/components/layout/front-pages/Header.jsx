@@ -64,7 +64,7 @@ const Header = ({ mode }) => {
             </div>
           )}
           <div className='flex items-center gap-2 sm:gap-4'>
-            <ModeDropdown />
+            {/* <ModeDropdown /> */}
             {(!session) ? (
               <Link href='/login'>
                 <Button variant='outlined' className='rounded-full px-3 py-1 text-sm font-semibold'>

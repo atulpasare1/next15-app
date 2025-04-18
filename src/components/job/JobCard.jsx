@@ -42,7 +42,7 @@ const JobCard = ({ job }) => {
         <Stack direction="row" alignItems="center" spacing={1} mb={0}>
         <Stack direction="row" alignItems="center" mb={3} spacing={0.5}>
             <i className='tabler-map-pin text-lg' />
-        
+
             <Typography variant="body2" color="text.secondary">
               {location}
             </Typography>
@@ -51,16 +51,16 @@ const JobCard = ({ job }) => {
           <Typography variant="body2" mx={5} color="text.secondary">
             {company}
           </Typography>
-          
+
         </Stack>
 
         {/* Job Details */}
         <Stack direction="row" spacing={1} mb={0}>
-         
+
         <List sx={{ width: '100%',mb:0 }}>
       <ListItem>
         <ListItemText
-        
+
           secondary={
             <>
               <span style={{}}>• 5+ years of experience • 1 opening</span>
@@ -68,19 +68,21 @@ const JobCard = ({ job }) => {
           }
         />
       </ListItem>
-     
+
     </List>
         </Stack>
-
-        {/* Job Description and Skills */}
-        <Typography variant="body2" color="text.secondary" mb={2}>
-        
-          <br />
-          {skills.split(',').map((skill, index) =>
-   <Chip label={skill.trim()} key={index} size="small" variant="filled" sx={{ margin: 0.5 }} />
-)}
-        </Typography>
-
+{/* Job Description and Skills */}
+<Typography variant="body2" color="text.secondary" component="div" mb={2}>
+  {skills?.split(',').map((skill, index) => (
+    <Chip
+      label={skill.trim()}
+      key={index}
+      size="small"
+      variant="filled"
+      sx={{ margin: 0.5 }}
+    />
+  ))}
+</Typography>
         {/* Posted Date and Save Button */}
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="caption" color="text.secondary">

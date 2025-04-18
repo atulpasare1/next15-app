@@ -3,175 +3,111 @@ import JobCard from '@/components/job/JobCard';
 import SearchBar from '@/components/job/SearchBar';
 import React, { useState, useEffect } from 'react';
 import apiService, { endpoints } from '@/libs/apiService';
-import { useRouter,useParams, usePathname } from 'next/navigation';
+import { useRouter,useParams,useSearchParams, usePathname } from 'next/navigation';
+import { from } from 'stylis';
 
 const JobSearchResult = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState([]);
   const [jobtitle, setJobtitle] = useState('');
   const [location, setLocation] = useState('');
   const [experience, setExperience] = useState('Your Experience');
   const [companyName, setCompanyName] = useState("");
+  const [filters, setFilters] = useState({});
+  const [queryFilters, setQueryFilters] = useState({});
+  const [totalPages, setTotalPages] = useState(1);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalItems: 0,
+    currentpge: 1,
+    from: 0,
+    to:0
+  });
   const router = useRouter();
 // Get dynamic params and pathname
-const params = useParams();
+//const params = useParams();
 const pathname = usePathname();
-  // Extract values from URL and fetch jobs
-  useEffect(() => {
-    // Reset state to avoid stale values
-    setJobtitle("");
-    setLocation("");
-    setCompanyName("");
+// Mock params for dynamic routes (replace with actual params from Next.js dynamic routes)
+const params = {
+  jobtitle: pathname.split('/')[1]?.replace('-jobs', '') || '',
+};
 
-    let jobKeyword = "";
-    let jobLocation = "";
-    let jobCompany = "";
+// Fetch jobs with specific parameters, including query filters
+const fetchJobsWithParams = async (jobKeyword, jobLocation, jobCompany, queryFilters = {}) => {
+  setLoading(true);
+  try {
+    // Create a clean params object without undefined values
+    const params = {};
 
-    console.log('Current pathname:', pathname);
-    console.log('Current params:', params);
+    // Add path-based parameters
+    if (jobKeyword) params.k = jobKeyword;
+    if (jobLocation) params.l = jobLocation;
+    if (jobCompany) params.k = jobCompany; // Using 'k' for company as per your logic
 
-    // Handle route: /[keyword]-jobs (e.g., /java-jobs)
-    if (pathname.match(/\/[^/]+-jobs$/)) {
-      const keyword = params.jobtitle;
-      if (keyword) {
-        // Convert keyword to readable format (e.g., "java" -> "Java")
-        const formattedKeyword = keyword
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-        setJobtitle(formattedKeyword);
-        jobKeyword = formattedKeyword;
+    // Add query-based parameters
+    Object.entries(queryFilters).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        params[key] = value; // API expects array values (e.g., is_remote: ['1', '3', '0'])
+      } else {
+        params[key] = value;
       }
+    });
+
+    // Build query string, handling array parameters correctly
+    const queryString = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((val) => queryString.append(`${key}[]`, val));
+      } else {
+        queryString.append(key, value);
+      }
+    });
+
+    // Make direct fetch request to the API
+    const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
+    console.log('Fetching from URL:', apiUrl);
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded with status ${response.status}`);
     }
-    // Handle route: /[keyword]-jobs-in-[location] (e.g., /java-jobs-in-bangalore)
-    else if (pathname.match(/\/[^/]+-jobs-in-[^/]+$/)) {
-      const keyword = params.jobtitle;
-      const locationMatch = pathname.match(/jobs-in-([^/]+)$/);
-      const location = locationMatch ? locationMatch[1] : "";
 
-      if (keyword) {
-        const formattedKeyword = keyword
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-        setJobtitle(formattedKeyword);
-        jobKeyword = formattedKeyword;
-      }
+    const responseData = await response.json();
+    console.log('API Response:', responseData);
 
-      if (location) {
-        const formattedLocation = location
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-        setLocation(formattedLocation);
-        jobLocation = formattedLocation;
-      }
+    // Check if response data exists and has the expected structure
+    if (!responseData || !responseData.data || !responseData.data.jobs) {
+      console.error('Unexpected API response format:', responseData);
+      setJobs([]);
+      return;
     }
-    // Handle route: /jobs-by-[companyName] (e.g., /jobs-by-iitjobs-inc)
-    else if (pathname.match(/\/jobs-by-[^/]+$/)) {
-      // Extract company name from the URL
-      const companyMatch = pathname.match(/\/jobs-by-([^/]+)$/);
-      const company = companyMatch ? companyMatch[1] : "";
-      
-      console.log('Extracted company from URL:', company);
-      
-      if (company) {
-        // Format company name - try both formatted and original versions
-        const formattedCompanyName = company
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-        
-        // Keep the original format as well (might be what API expects)
-        const originalCompanyName = company.replace(/-/g, " ");
-        
-        console.log('Formatted company name:', formattedCompanyName);
-        console.log('Original company name:', originalCompanyName);
-        
-        setCompanyName(formattedCompanyName);
-        // Use the original format for the API call
-        jobCompany = originalCompanyName;
+
+    // Handle no jobs found
+    if (responseData.data.jobs.length === 0) {
+      console.log('No jobs found with the current parameters. Trying alternative approach...');
+      if (jobCompany && !jobKeyword && !jobLocation) {
+        const keywordFromCompany = jobCompany.split(' ')[0];
+        console.log('Trying search with keyword instead:', keywordFromCompany);
+        return fetchJobsWithParams(keywordFromCompany, '', '', queryFilters);
       }
     }
 
-    console.log('Extracted parameters:', { jobKeyword, jobLocation, jobCompany });
-    
-    // Fetch jobs with the extracted parameters
-    fetchJobsWithParams(jobKeyword, jobLocation, jobCompany);
-  }, [pathname, params]);
+    console.log('Fetched jobs:', responseData);
 
-  // Fetch jobs with specific parameters
-  const fetchJobsWithParams = async (jobKeyword, jobLocation, jobCompany) => {
-    setLoading(true);
-    try {
-      console.log('Fetching jobs with params:', {
-        k: jobKeyword || undefined,
-        l: jobLocation || undefined,
-        company: jobCompany || undefined
-      });
-      
-      // Create a clean params object without undefined values
-      const params = {};
-      if (jobKeyword) params.k = jobKeyword;
-      if (jobLocation) params.l = jobLocation;
-      if (jobCompany) {
-        // Try different formats for company name
-        params.k = jobCompany;
-        
-        // Log the exact URL that will be sent
-        console.log('Company parameter:', params.k);
-      }
-      
-      // Build query string
-      const queryString = new URLSearchParams(params).toString();
-      
-      // Make direct fetch request to the API
-      const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
-      console.log('Fetching from URL:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
-      }
-      
-      const responseData = await response.json();
-      console.log('API Response:', responseData);
-      
-      // Check if response data exists and has the expected structure
-      if (!responseData || !responseData.data || !responseData.data.jobs) {
-        console.error('Unexpected API response format:', responseData);
-        setJobs([]);
-        return;
-      }
-      
-      // Check if we got any jobs back
-      if (responseData.data.jobs.length === 0) {
-        console.log('No jobs found with the current parameters. Trying alternative approach...');
-        
-        // If no jobs found and we're searching by company, try a different format
-        if (jobCompany && !jobKeyword && !jobLocation) {
-          // Try searching by keyword instead
-          const keywordFromCompany = jobCompany.split(' ')[0]; // Use first word of company
-          console.log('Trying search with keyword instead:', keywordFromCompany);
-          
-          // Recursive call with different parameters
-          return fetchJobsWithParams(keywordFromCompany, '', '');
-        }
-      }
-      
-      console.log('Fetched jobs:-->', responseData);
-    
-      setJobs(responseData.data.jobs.map(jobs => {
+    setJobs(
+      responseData.data.jobs.map((jobs) => {
         const job = jobs._source;
-       
         return {
           id: job.id,
           cmp_id: job.company_id,
@@ -184,72 +120,85 @@ const pathname = usePathname();
           skills: job.skills,
           experience: job.experience,
           job_description: job.job_description,
-          posted_date: job.posted_date || '1 Day Ago'
-        }
-      }));
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-      console.error('Error details:', {
-        message: err.message,
-      });
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+          posted_date: job.posted_date || '1 Day Ago',
+        };
+      })
+    );
+    // Assume API returns total_pages or similar (adjust based on actual response)
+    setTotalPages(responseData.data.pagination.total || 1);
+    setPagination({
+      currentPage: responseData.data.pagination.current_page || 1,
+      totalPages: responseData.data.pagination.last_page   || 1,
+      pageSize: responseData.data.pagination.page_size || 10,
+      totalItems: responseData.data.pagination.total || 0,
+      from: responseData.data.pagination.from || 0,
+      to: responseData.data.pagination.to || 0,
+    });
+  } catch (err) {
+    console.error('Error fetching jobs:', err);
+    console.error('Error details:', { message: err.message });
+    setJobs([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // Regular fetchJobs that uses the current state
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      console.log('Fetching jobs with current state params:', {
-        k: jobtitle || undefined,
-        l: location || undefined,
-        exp: experience !== 'Your Experience' ? experience : undefined,
-        company: companyName || undefined
-      });
-      
-      // Create a clean params object without undefined values
-      const params = {};
-      if (jobtitle) params.k = jobtitle;
-      if (location) params.l = location;
-      if (experience && experience !== 'Your Experience') params.exp = experience;
-      if (companyName) params.company = companyName;
-      
-      // Build query string
-      const queryString = new URLSearchParams(params).toString();
-      
-      // Make direct fetch request to the API
-      const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
-      console.log('Fetching from URL:', apiUrl);
-      
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
+// Regular fetchJobs that uses the current state
+const fetchJobs = async () => {
+  setLoading(true);
+  try {
+    const params = {};
+    if (jobtitle) params.k = jobtitle;
+    if (location) params.l = location;
+    if (companyName) params.company = companyName;
+
+    // Include query filters from state
+    Object.entries(filters).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        params[key] = value;
+      } else {
+        params[key] = value;
       }
-      
-      const responseData = await response.json();
-      console.log('API Response:', responseData);
-      
-      // Check if response data exists and has the expected structure
-      if (!responseData || !responseData.data || !responseData.data.jobs) {
-        console.error('Unexpected API response format:', responseData);
-        setJobs([]);
-        return;
+    });
+
+    const queryString = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((val) => queryString.append(`${key}[]`, val));
+      } else {
+        queryString.append(key, value);
       }
-      
-      console.log('Fetched jobs:-->', responseData);
-    
-      setJobs(responseData.data.jobs.map(jobs => {
+    });
+
+    const apiUrl = `https://testxlake.iitjobs.com/api${endpoints.job.searchJobs}${queryString ? '?' + queryString : ''}`;
+    console.log('Fetching from URL:', apiUrl);
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log('API Response:', responseData);
+
+    if (!responseData || !responseData.data || !responseData.data.jobs) {
+      console.error('Unexpected API response format:', responseData);
+      setJobs([]);
+      return;
+    }
+
+    console.log('Fetched jobs:', responseData);
+
+    setJobs(
+      responseData.data.jobs.map((jobs) => {
         const job = jobs._source;
-       
         return {
           id: job.id,
           cmp_id: job.company_id,
@@ -262,19 +211,142 @@ const pathname = usePathname();
           skills: job.skills,
           experience: job.experience,
           job_description: job.job_description,
-          posted_date: job.posted_date || '1 Day Ago'
-        }
-      }));
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-      console.error('Error details:', {
-        message: err.message,
-      });
-      setJobs([]);
-    } finally {
-      setLoading(false);
+          posted_date: job.posted_date || '1 Day Ago',
+        };
+      })
+    );
+  } catch (err) {
+    console.error('Error fetching jobs:', err);
+    console.error('Error details:', { message: err.message });
+    setJobs([]);
+  } finally {
+    setLoading(false);
+  }
+};
+// Update URL with new page
+const updatePage = (newPage) => {
+  const newParams = new URLSearchParams(searchParams);
+  newParams.set('page', newPage);
+  router.push(`${pathname}?${newParams.toString()}`);
+};
+
+useEffect(() => {
+  // Reset state to avoid stale values
+  setJobtitle('');
+  setLocation('');
+  setCompanyName('');
+  setFilters({});
+
+  let jobKeyword = '';
+  let jobLocation = '';
+  let jobCompany = '';
+  const queryFilters = {};
+
+  // Extract query parameters
+  searchParams.forEach((value, key) => {
+    const baseKey = key.replace('[]', '');
+    if (key.includes('[]')) {
+      if (!queryFilters[baseKey]) queryFilters[baseKey] = [];
+      queryFilters[baseKey].push(value);
+    } else {
+      queryFilters[key] = value;
     }
-  };
+  });
+
+  console.log('Extracted query filters:', queryFilters);
+
+  // Handle route: /[keyword]-jobs (e.g., /java-jobs)
+  if (pathname.match(/\/[^/]+-jobs$/)) {
+    const keyword = params.jobtitle;
+    if (keyword) {
+      const formattedKeyword = keyword
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      setJobtitle(formattedKeyword);
+      jobKeyword = formattedKeyword;
+    }
+  }
+  // Handle route: /[keyword]-jobs-in-[location] (e.g., /java-jobs-in-bangalore)
+  else if (pathname.match(/\/[^/]+-jobs-in-[^/]+$/)) {
+    const keyword = params.jobtitle;
+    const locationMatch = pathname.match(/jobs-in-([^/]+)$/);
+    const location = locationMatch ? locationMatch[1] : '';
+
+    if (keyword) {
+      const formattedKeyword = keyword
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      setJobtitle(formattedKeyword);
+      jobKeyword = formattedKeyword;
+    }
+
+    if (location) {
+      const formattedLocation = location
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      setLocation(formattedLocation);
+      jobLocation = formattedLocation;
+    }
+  }
+  // Handle route: /jobs-by-[companyName] (e.g., /jobs-by-iitjobs-inc)
+  else if (pathname.match(/\/jobs-by-[^/]+$/)) {
+    const companyMatch = pathname.match(/\/jobs-by-([^/]+)$/);
+    const company = companyMatch ? companyMatch[1] : '';
+
+    if (company) {
+      const formattedCompanyName = company
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      const originalCompanyName = company.replace(/-/g, ' ');
+      setCompanyName(formattedCompanyName);
+      jobCompany = originalCompanyName;
+    }
+  }
+
+  console.log('Extracted parameters:', { jobKeyword, jobLocation, jobCompany, queryFilters });
+
+  // Store query filters in state
+  setFilters(queryFilters);
+
+  // Fetch jobs with all parameters
+  fetchJobsWithParams(jobKeyword, jobLocation, jobCompany, queryFilters);
+}, [pathname, searchParams]);
+
+// Generate numbered page links (e.g., 1, 2, 3, ..., totalPages)
+const renderPageLinks = () => {
+  const currentPage = Number(filters.page || 1);
+  const maxPagesToShow = 5; // Limit number of page links
+  const pages = [];
+  const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+  const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(
+      <button
+        key={i}
+        onClick={() => updatePage(i)}
+        disabled={i === currentPage}
+        style={{
+          margin: '0 5px',
+          padding: '5px 10px',
+          background: i === currentPage ? '#007bff' : '#fff',
+          color: i === currentPage ? '#fff' : '#007bff',
+          border: '1px solid #007bff',
+          borderRadius: '4px',
+          cursor: i === currentPage ? 'default' : 'pointer',
+        }}
+      >
+        {i}
+      </button>
+    );
+  }
+
+  return pages;
+};
 
   // Handle form submission and navigate to appropriate route
   const handleSearchSubmit = (newJobtitle, newLocation, newCompanyName) => {
@@ -345,7 +417,7 @@ const pathname = usePathname();
         </button>
       </div>
 
-      {/* SearchBar with submit handler */}
+      {/* Search Bar */}
       <SearchBar onSubmit={handleSearchSubmit} initialJobtitle={jobtitle} initialLocation={location} initialExperience={experience} />
 
       {/* Drawer for Filters (Mobile) */}
@@ -354,94 +426,27 @@ const pathname = usePathname();
           isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
         } transition-transform duration-300 ease-in-out z-50 md:hidden`}
       >
-        <button
-          onClick={() => setIsDrawerOpen(false)}
-          className="mb-4 text-red-500"
-        >
+        <button onClick={() => setIsDrawerOpen(false)} className="mb-4 text-red-500">
           Close
         </button>
-        <h2 className="text-lg font-semibold mb-2">Filters</h2>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Experience</label>
-          <input
-            type="range"
-            min="0"
-            max="31"
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="text-sm text-gray-600">0 years - 31 years</div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Date posted</label>
-          <div className="space-y-2">
-            <label className="flex items-center">
-              <input type="radio" name="date" className="mr-2" defaultChecked />
-              All
-            </label>
-            <label className="flex items-center">
-              <input type="radio" name="date" className="mr-2" />
-              Last 24 hours
-            </label>
-            <label className="flex items-center">
-              <input type="radio" name="date" className="mr-2" />
-              Last 3 days
-            </label>
-            <label className="flex items-center">
-              <input type="radio" name="date" className="mr-2" />
-              Last 7 days
-            </label>
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Salary</label>
-          <input
-            type="range"
-            min="0"
-            max="150000"
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="text-sm text-gray-600">₹0 - ₹1.5 Lakhs</div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Highest education</label>
-          <div className="space-y-2">
-            <label className="flex items-center">
-              <input type="radio" name="education" className="mr-2" />
-              10 or Below 10th
-            </label>
-          </div>
-        </div>
+        <FilterContent />
       </div>
 
-      {/* Overlay for Drawer */}
+      {/* Overlay */}
       {isDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsDrawerOpen(false)}
-        ></div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsDrawerOpen(false)}></div>
       )}
 
       {/* Main Content */}
       <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-        {/* Hidden on mobile, shown on desktop */}
-        <div className="hidden md:block w-1/4 bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold mb-2">Filters</h2>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Experience</label>
-            <input
-              type="range"
-              min="0"
-              max="31"
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="text-sm text-gray-600">0 years - 31 years</div>
-          </div>
-          {/* Add other filter sections here as in the drawer */}
+        {/* Sidebar Filters (Desktop) */}
+        <div className="hidden md:block w-1/4  p-4 rounded-lg ">
+          <FilterContent />
         </div>
 
         {/* Job Listings */}
         <div className="w-full md:w-2/4 space-y-4">
-        {loading ? (
+          {loading ? (
             <p>Loading jobs...</p>
           ) : Array.isArray(jobs) && jobs.length > 0 ? (
             jobs.map((job, index) => <JobCard key={index} job={job} />)
@@ -449,23 +454,120 @@ const pathname = usePathname();
             <p>No jobs found.</p>
           )}
         </div>
+      </div>
+         {/* Pagination Controls */}
+         <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <button
+          onClick={() => updatePage(Number(filters.page || 1) - 1)}
+          disabled={Number(filters.page || 1) <= 1}
+          style={{
+            margin: '0 10px',
+            padding: '5px 10px',
+            background: Number(filters.page || 1) <= 1 ? '#ccc' : '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: Number(filters.page || 1) <= 1 ? 'not-allowed' : 'pointer',
+          }}
+        >
+          Previous
+        </button>
 
-        {/* Hidden on mobile */}
-        <div className="hidden md:block w-1/4 bg-blue-50 p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold mb-2">Login with iitjobs and experience more !</h2>
-          <ul className="text-blue-700 list-disc list-inside mb-4">
-            <li>Personalised job matches</li>
-            <li>Direct connect with HRs</li>
-            <li>Latest updates on the job</li>
-          </ul>
-          <div className="bg-gray-200 p-4 rounded-lg mb-4"></div>
-          <button className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-            Create profile
-          </button>
-        </div>
+        {renderPageLinks()}
+
+        <button
+          onClick={() => updatePage(Number(filters.page || 1) + 1)}
+          disabled={Number(filters.page || 1) >= totalPages}
+          style={{
+            margin: '0 10px',
+            padding: '5px 10px',
+            background: Number(filters.page || 1) >= totalPages ? '#ccc' : '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: Number(filters.page || 1) >= totalPages ? 'not-allowed' : 'pointer',
+          }}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
+}
+
+// FILTER CONTENT COMPONENT (Used for both mobile + desktop)
+function FilterContent() {
+  return (
+    <div>
+      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2H3V4zm0 6h18v2H3v-2zm0 6h18v2H3v-2z" />
+        </svg>
+        Filter
+      </h2>
+
+      <div className="border-t pt-4">
+        <DisclosureSection title="Work Mode" position={1}>
+          {["Remote", "Hybrid", "In-Person"].map((option) => (
+            <CheckboxOption key={option} label={option} />
+          ))}
+        </DisclosureSection>
+
+        <DisclosureSection title="Job Type" position={2}>
+          {["Full-Time", "Part-Time", "Contract", "Internship"].map((option) => (
+            <CheckboxOption key={option} label={option} />
+          ))}
+        </DisclosureSection>
+
+        <DisclosureSection title="Date Posted" position={3}>
+          {["Last 24 hours", "Last 3 days", "Last 7 days", "Last 14 days"].map((option) => (
+            <CheckboxOption key={option} label={option} />
+          ))}
+        </DisclosureSection>
+      </div>
+    </div>
+  );
+}
+
+// DROPDOWN COMPONENT
+function DisclosureSection({ title, children, position }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mb-2">
+      <button
+        className="w-full flex justify-between items-center text-left font-medium text-gray-800 bg-transparent focus:outline-none focus:ring-0 shadow-none pb-2"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="text-sm">{title}</span>
+        <span className="text-sm">{open ? '▾' : '▸'}</span>
+      </button>
+
+
+
+      {open && (
+        <div className="space-y-1 pl-2 text-sm text-gray-700">
+          {children}
+        </div>
+      )}
+       {/* Show horizontal line only when open and position is 1 or 2 */}
+       {open && position < 3 && <div className="border-b border-gray-300 mb-2 mt-2"></div>}
+    </div>
+  );
+}
+
+
+// CHECKBOX COMPONENT
+function CheckboxOption({ label }) {
+  return (
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input type="checkbox" className="form-checkbox h-4 w-4 text-indigo-600" />
+      <span>{label}</span>
+    </label>
+  );
+
 };
+
+
 
 export default JobSearchResult;

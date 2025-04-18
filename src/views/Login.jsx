@@ -44,7 +44,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 const LoginIllustration = styled('img')(({ theme }) => ({
   zIndex: 2,
   blockSize: 'auto',
- 
+
   maxInlineSize: '100%',
   margin: theme.spacing(0),
   [theme.breakpoints.down(1536)]: {
@@ -83,7 +83,7 @@ const Login = ({ mode }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { lang: locale } = useParams()
-  
+
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
@@ -124,9 +124,19 @@ const Login = ({ mode }) => {
       router.replace(getLocalizedUrl(redirectURL, locale))
     } else {
       if (res?.error) {
-        const error = JSON.parse(res.error)
+        console.log(res);
+        //const error = JSON.parse(res.error)
 
-        setErrorState(error)
+        setErrorState(res.error)
+      }
+      if (res?.status === 401) {
+        setErrorState({
+          message: ['Email or Password is invalid']
+        })
+      } else {
+        setErrorState({
+          message: ['Something went wrong']
+        })
       }
     }
   }
@@ -136,11 +146,11 @@ const Login = ({ mode }) => {
       <div
         className={classnames(
           'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative  max-md:hidden',
-          
+
         )}
       >
         <LoginIllustration src={characterIllustration} alt='character-illustration' />
-       
+
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
         <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
@@ -151,7 +161,7 @@ const Login = ({ mode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          
+
           <form
             noValidate
             autoComplete='off'

@@ -81,35 +81,37 @@ const steps = ['Upload Document', 'Personal Information', 'Security'];
 const Register = ({ mode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
-  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false)
+  const [ispassword_confirmationShown, setIspassword_confirmationShown] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
+  const [fieldErrors, setFieldErrors] = useState({});
   const [formData, setFormData] = useState({
-    profileImage: null,
-    firstName: '',
-    lastName: '',
+    resume: null,
+    first_name: '',
+    last_name: '',
     email: '',
-    mobile: '',
+    phone: '',
     countryCode: '+1',
     location: '',
     password: '',
-    confirmPassword: '',
+    password_confirmation: '',
     agreeToTerms: false
   })
   const [fileName, setFileName] = useState('')
-  
+
   // Validation states
   const [errors, setErrors] = useState({
-    profileImage: '',
-    firstName: '',
-    lastName: '',
+    resume: '',
+    first_name: '',
+    last_name: '',
     email: '',
-    mobile: '',
+    phone: '',
     location: '',
     password: '',
-    confirmPassword: '',
+    password_confirmation: '',
     agreeToTerms: ''
   })
   const [stepError, setStepError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
@@ -135,20 +137,32 @@ const Register = ({ mode }) => {
   )
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
-  const handleClickShowConfirmPassword = () => setIsConfirmPasswordShown(show => !show)
+  const handleClickShowpassword_confirmation = () => setIspassword_confirmationShown(show => !show)
 
   // Validation functions
   const validateStep1 = () => {
     let valid = true;
     const newErrors = { ...errors };
-    
-    if (!formData.profileImage) {
-      newErrors.profileImage = 'Please upload a document';
+
+    if (!formData.resume) {
+      newErrors.resume = 'Please upload a Resume';
       valid = false;
     } else {
-      newErrors.profileImage = '';
+      const fileType = formData.resume.type;
+      const fileSize = formData.resume.size;
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(fileType)) {
+        newErrors.resume = 'Invalid file type. Only PDF, docx, and doc are allowed.';
+        valid = false;
+      } else if (fileSize > maxSize) {
+        newErrors.resume = 'File size exceeds 2MB limit.';
+        valid = false;
+      } else {
+      newErrors.resume = '';
     }
-    
+  }
+
     setErrors(newErrors);
     return valid;
   };
@@ -156,21 +170,21 @@ const Register = ({ mode }) => {
   const validateStep2 = () => {
     let valid = true;
     const newErrors = { ...errors };
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'First name is required';
       valid = false;
     } else {
-      newErrors.firstName = '';
+      newErrors.first_name = '';
     }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = 'Last name is required';
       valid = false;
     } else {
-      newErrors.lastName = '';
+      newErrors.last_name = '';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
       valid = false;
@@ -180,24 +194,24 @@ const Register = ({ mode }) => {
     } else {
       newErrors.email = '';
     }
-    
-    if (!formData.mobile.trim()) {
-      newErrors.mobile = 'Mobile number is required';
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'phone number is required';
       valid = false;
-    } else if (!/^\d+$/.test(formData.mobile)) {
-      newErrors.mobile = 'Mobile number should contain only digits';
+    } else if (!/^\d+$/.test(formData.phone)) {
+      newErrors.phone = 'phone number should contain only digits';
       valid = false;
     } else {
-      newErrors.mobile = '';
+      newErrors.phone = '';
     }
-    
+
     if (!formData.location.trim()) {
       newErrors.location = 'Location is required';
       valid = false;
     } else {
       newErrors.location = '';
     }
-    
+
     setErrors(newErrors);
     return valid;
   };
@@ -205,7 +219,7 @@ const Register = ({ mode }) => {
   const validateStep3 = () => {
     let valid = true;
     const newErrors = { ...errors };
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
       valid = false;
@@ -215,31 +229,31 @@ const Register = ({ mode }) => {
     } else {
       newErrors.password = '';
     }
-    
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+
+    if (!formData.password_confirmation) {
+      newErrors.password_confirmation = 'Please confirm your password';
       valid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    } else if (formData.password !== formData.password_confirmation) {
+      newErrors.password_confirmation = 'Passwords do not match';
       valid = false;
     } else {
-      newErrors.confirmPassword = '';
+      newErrors.password_confirmation = '';
     }
-    
+
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = 'You must agree to the terms and conditions';
       valid = false;
     } else {
       newErrors.agreeToTerms = '';
     }
-    
+
     setErrors(newErrors);
     return valid;
   };
 
   const validateCurrentStep = () => {
     setStepError('');
-    
+
     switch (activeStep) {
       case 0:
         return validateStep1();
@@ -252,11 +266,105 @@ const Register = ({ mode }) => {
     }
   };
 
-  const handleNext = () => {
-    if (validateCurrentStep()) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handleNext = async () => {
+    if (activeStep === 0 && validateCurrentStep()) {
+      setIsSubmitting(true);
+      setStepError('');
+
+      try {
+
+
+        const formDataToSend = new FormData();
+        formDataToSend.append('resume', formData.resume);
+
+        const response = await fetch('https://testxlake.iitjobs.com/api/ai-register-step1', {
+          method: 'POST',
+          body: formDataToSend,
+        });
+
+        const result = await response.json();
+          console.log(result);
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to upload resume');
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          uploadedFileUrl: result.fileUrl || '',
+          email: result.data.email || "",
+          first_name: result.data.fname || "",
+          last_name: result.data.lname || "",
+          phone: result.data.phone || "",
+          countryCode: result.data?.countryCode || "+91",
+          location: result.data.location || "",
+
+          resume: result.data.file_name || "",
+
+        }));
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      } catch (error) {
+        setStepError(error.message || 'An error occurred during upload');
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else if (activeStep === 1 && validateCurrentStep()) {
+      setStepError('');
+      setIsSubmitting(true);
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append('resume', formData.resume);
+        formDataToSend.append('first_name', formData.first_name);
+        formDataToSend.append('last_name', formData.last_name);
+        formDataToSend.append('email', formData.email);
+        formDataToSend.append('phone', formData.phone);
+        formDataToSend.append('countryCode', formData.countryCode);
+        formDataToSend.append('location', formData.location);
+
+        const response = await fetch('https://testxlake.iitjobs.com/api/ai-register-step2', {
+          method: 'POST',
+          body: formDataToSend,
+        });
+
+        const result = await response.json();
+          console.log(result);
+        if (!response.ok ) {
+         // throw new Error(result.message || 'Failed to upload resume');
+        }
+        if (result.status === 'error' ) {
+         if (result.errors) {
+          // Transform server errors into field-specific error messages
+          const formattedErrors = {};
+          Object.keys(result.errors).forEach((field) => {
+            // Take the first error message from the array (or join all if needed)
+            formattedErrors[field] = result.errors[field][0];
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              [field]: formattedErrors[field]
+            }));
+
+            setStepError(result.errors[field][0]);
+          });
+
+        } else {
+          // Handle generic errors (e.g., 500 or no specific errors)
+          setStepError(data.error || 'Failed to register. Please try again.');
+        }
+        }else{
+          setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+
+      }
+      catch (error) {
+        setStepError(error.message || 'An error occurred during upload');
+      }
+      finally {
+        setIsSubmitting(false);
+      }
+
+
     } else {
-      setStepError('Please fix the errors before proceeding.');
+      setStepError('Please fix the errors before proceeding');
     }
   };
 
@@ -267,14 +375,14 @@ const Register = ({ mode }) => {
 
   const handleChange = (e) => {
     const { name, value, checked, type, files } = e.target;
-    
+
     if (type === 'file' && files.length > 0) {
       setFormData({
         ...formData,
         [name]: files[0]
       });
       setFileName(files[0].name);
-      
+
       // Clear error when file is uploaded
       setErrors({
         ...errors,
@@ -285,7 +393,7 @@ const Register = ({ mode }) => {
         ...formData,
         [name]: checked
       });
-      
+
       // Clear error when checkbox is checked
       if (checked) {
         setErrors({
@@ -298,7 +406,7 @@ const Register = ({ mode }) => {
         ...formData,
         [name]: value
       });
-      
+
       // Clear error when field is filled
       if (value.trim() !== '') {
         setErrors({
@@ -308,17 +416,45 @@ const Register = ({ mode }) => {
       }
     }
   };
+  const submitRegistration = async (data) => {
+    const response = await fetch('https://testxlake.iitjobs.com/api/ai-register-step3', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    return response;
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (activeStep < steps.length - 1) {
       handleNext();
     } else {
       if (validateStep3()) {
         // Here you would handle the final submission
+        setStepError('');
+        setIsSubmitting(true);
+
         console.log('Form submitted:', formData);
         // Submit to your API or authentication service
+        // For example, you might use a function like this:
+        // const response = await submitRegistration(formData);
+        const response =  submitRegistration(formData);
+        if (!response.ok) {
+          setStepError('Failed to register. Please try again.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Example:
+        // await submitForm(formData);
+        // Reset form or redirect user
+       // setActiveStep(0);
+
       } else {
         setStepError('Please fix the errors before submitting.');
       }
@@ -338,12 +474,12 @@ const Register = ({ mode }) => {
           variant="contained"
           startIcon={<i className="tabler-upload" />}
           sx={{ mb: 2 }}
-          color={errors.profileImage ? 'error' : 'primary'}
+          color={errors.resume ? 'error' : 'primary'}
         >
           Upload File
-          <VisuallyHiddenInput 
-            type="file" 
-            name="profileImage"
+          <VisuallyHiddenInput
+            type="file"
+            name="resume"
             onChange={handleChange}
             accept="image/*,.pdf"
           />
@@ -353,9 +489,9 @@ const Register = ({ mode }) => {
             Selected file: {fileName}
           </Typography>
         )}
-        {errors.profileImage && (
+        {errors.resume && (
           <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-            {errors.profileImage}
+            {errors.resume}
           </Typography>
         )}
       </Box>
@@ -374,22 +510,22 @@ const Register = ({ mode }) => {
           <CustomTextField
             fullWidth
             label='First Name'
-            name='firstName'
-            value={formData.firstName}
+            name='first_name'
+            value={formData.first_name}
             onChange={handleChange}
             placeholder='Enter your first name'
-            error={!!errors.firstName}
-            helperText={errors.firstName}
+            error={!!errors.first_name}
+            helperText={errors.first_name}
           />
           <CustomTextField
             fullWidth
             label='Last Name'
-            name='lastName'
-            value={formData.lastName}
+            name='last_name'
+            value={formData.last_name}
             onChange={handleChange}
             placeholder='Enter your last name'
-            error={!!errors.lastName}
-            helperText={errors.lastName}
+            error={!!errors.last_name}
+            helperText={errors.last_name}
           />
         </Box>
         <CustomTextField
@@ -420,13 +556,13 @@ const Register = ({ mode }) => {
           </CustomTextField>
           <CustomTextField
             fullWidth
-            label='Mobile Number'
-            name='mobile'
-            value={formData.mobile}
+            label='phone Number'
+            name='phone'
+            value={formData.phone}
             onChange={handleChange}
-            placeholder='Enter your mobile number'
-            error={!!errors.mobile}
-            helperText={errors.mobile}
+            placeholder='Enter your phone number'
+            error={!!errors.phone}
+            helperText={errors.phone}
           />
         </Box>
         <CustomTextField
@@ -476,19 +612,19 @@ const Register = ({ mode }) => {
         <CustomTextField
           fullWidth
           label='Confirm Password'
-          name='confirmPassword'
-          value={formData.confirmPassword}
+          name='password_confirmation'
+          value={formData.password_confirmation}
           onChange={handleChange}
           placeholder='············'
-          type={isConfirmPasswordShown ? 'text' : 'password'}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword}
+          type={ispassword_confirmationShown ? 'text' : 'password'}
+          error={!!errors.password_confirmation}
+          helperText={errors.password_confirmation}
           slotProps={{
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <IconButton edge='end' onClick={handleClickShowConfirmPassword} onMouseDown={e => e.preventDefault()}>
-                    <i className={isConfirmPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
+                  <IconButton edge='end' onClick={handleClickShowpassword_confirmation} onMouseDown={e => e.preventDefault()}>
+                    <i className={ispassword_confirmationShown ? 'tabler-eye-off' : 'tabler-eye'} />
                   </IconButton>
                 </InputAdornment>
               )
@@ -497,7 +633,7 @@ const Register = ({ mode }) => {
         />
         <FormControlLabel
           control={
-            <Checkbox 
+            <Checkbox
               name='agreeToTerms'
               checked={formData.agreeToTerms}
               onChange={handleChange}
@@ -556,8 +692,8 @@ const Register = ({ mode }) => {
           {/* <Logo /> */}
         </Link>
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] mbs-8 sm:mbs-11 md:mbs-0'>
-          
-          
+
+
           {/* <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
             {steps.map((label) => (
               <Step key={label}>
@@ -565,31 +701,32 @@ const Register = ({ mode }) => {
               </Step>
             ))}
           </Stepper> */}
-          
+
           <form noValidate autoComplete='off' onSubmit={handleSubmit} className='flex flex-col gap-6'>
             {stepError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {stepError}
               </Alert>
             )}
-            
+
             {getStepContent(activeStep)}
-            
+
             <Stack direction="row" spacing={2} justifyContent="space-between">
               {activeStep > 0 && (
                 <Button onClick={handleBack} variant="outlined">
                   Back
                 </Button>
               )}
-              <Button 
-                type="submit" 
-                variant="contained" 
+              <Button
+                type="submit"
+                variant="contained"
                 sx={{ ml: activeStep === 0 ? 'auto' : 0 }}
               >
-                {activeStep === steps.length - 1 ? 'Sign Up' : 'Next'}
+
+                {activeStep === steps.length - 1 ? 'Sign Up' : isSubmitting ? 'Uploading...' : 'Next'}
               </Button>
             </Stack>
-            
+
             {activeStep === steps.length - 1 && (
               <>
                 <div className='flex justify-center items-center flex-wrap gap-2'>

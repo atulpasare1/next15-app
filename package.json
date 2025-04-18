@@ -9,7 +9,6 @@
     "start": "next start",
     "lint": "next lint"
   },
-
   "dependencies": {
     "@auth/prisma-adapter": "2.7.4",
     "@emoji-mart/data": "1.2.1",
@@ -72,6 +71,7 @@
     "react-use": "17.6.0",
     "recharts": "2.15.0",
     "server-only": "0.0.1",
+    "swr": "^2.3.3",
     "valibot": "0.42.1"
   },
   "devDependencies": {
