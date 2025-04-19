@@ -1,0 +1,32 @@
+"use client";
+
+import React from 'react';
+import { Box, Typography, Switch, FormControlLabel } from '@mui/material';
+
+function VisibilityTab() {
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  const handleToggle = () => {
+    setIsVisible(!isVisible);
+    // Handle save logic
+    console.log('Visibility toggled:', !isVisible);
+  };
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Visibility Settings
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        You accept that anyone can see a snippet of your profile with your name, job title, and location — key details that
+        connect you to exciting opportunities. Everything else stays private, giving you control over your visibility.
+      </Typography>
+      <FormControlLabel
+        control={<Switch checked={isVisible} onChange={handleToggle} />}
+        label="Enable Visibility"
+      />
+    </Box>
+  );
+}
+
+export default VisibilityTab;
